@@ -1,0 +1,36 @@
+{
+  "name": "techwholesale-ecommerce",
+  "version": "1.0.0",
+  "description": "TechWholesale E-commerce Scaffold - Next.js + Node.js",
+  "private": true,
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=api\" \"npm run dev --workspace=web\"",
+    "build": "npm run build --workspace=api && npm run build --workspace=web",
+    "start": "node api/src/server.js",
+    "test": "npm run test --workspace=api",
+    "lint": "npm run lint --workspace=api && npm run lint --workspace=web",
+    "setup:db": "mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD < database/schema.sql",
+    "seed:db": "npm run seed --workspace=api",
+    "migrate": "npm run migrate --workspace=api"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "ecommerce",
+    "nextjs",
+    "nodejs",
+    "express",
+    "mysql"
+  ],
+  "author": "TechWholesale",
+  "license": "MIT"
+}
