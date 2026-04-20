@@ -9,6 +9,10 @@ yarn.lock
 .env
 .env.local
 .env.*.local
+api/.env
+web/.env.local
+# Keep the example file
+!.env.example
 
 # IDE
 .vscode/

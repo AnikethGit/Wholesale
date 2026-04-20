@@ -15,9 +15,7 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx'],
   productionBrowserSourceMaps: false,
   optimizeFonts: true,
-  experimental: {
-    optimizePackageImports: ['/icons']
-  }
+  experimental: {}
 };
 
 module.exports = nextConfig;
