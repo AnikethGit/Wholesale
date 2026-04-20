@@ -1,21 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
-    unoptimized: true, // For Hostinger compatibility
-    domains: ['localhost', 'api.techwholesale.com']
+    unoptimized: true,
+    remotePatterns: [
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https', hostname: 'api.techwholesale.com' }
+    ]
   },
   env: {
     API_URL: process.env.NEXT_PUBLIC_API_URL
   },
   poweredByHeader: false,
   compress: true,
-  generateEtags: true,
-  pageExtensions: ['js', 'jsx'],
-  productionBrowserSourceMaps: false,
-  optimizeFonts: true,
-  experimental: {}
+  pageExtensions: ['js', 'jsx']
 };
 
 module.exports = nextConfig;
