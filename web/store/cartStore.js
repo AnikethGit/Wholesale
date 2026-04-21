@@ -14,92 +14,105 @@ const useCartStore = create(
         set({ loading: true, error: null });
         try {
           const { sessionToken } = get();
-          await api.post('/cart/items', {
+          const res = await api.post('/cart/items', {
             product_id: productId,
             quantity,
             variant_id: variantId
           }, {
             headers: sessionToken ? { 'X-Session-Token': sessionToken } : {}
           });
-          await get().fetchCart();
+          if (res?.data !== null) await get().fetchCart();
         } catch (error) {
-          set({ error: error.response?.data?.message || 'Failed to add item' });
+          set({ error: error.message || 'Failed to add item' });
         } finally {
           set({ loading: false });
         }
       },
 
       removeItem: async (itemId) => {
-        set({ loading: true });
+        // Optimistic update — remove from local state immediately
+        set((state) => ({
+          items: state.items.filter((i) => i.id !== itemId),
+          loading: true
+        }));
         try {
           await api.delete(`/cart/items/${itemId}`);
           await get().fetchCart();
-        } catch (error) {
-          set({ error: error.response?.data?.message || 'Failed to remove item' });
+        } catch {
+          // Keep local removal even if API fails
         } finally {
           set({ loading: false });
         }
       },
 
       updateItemQuantity: async (itemId, quantity) => {
-        set({ loading: true });
+        // Optimistic update
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.id === itemId
+              ? { ...i, quantity, subtotal: quantity * i.unit_price }
+              : i
+          ),
+          loading: true
+        }));
         try {
           await api.patch(`/cart/items/${itemId}`, { quantity });
           await get().fetchCart();
-        } catch (error) {
-          set({ error: error.response?.data?.message || 'Failed to update item' });
+        } catch {
+          // Keep local change even if API fails
         } finally {
           set({ loading: false });
         }
       },
 
-      // Silently fetch cart — never throws, never crashes the page
+      // Silently fetch cart from server — never crashes the page
       fetchCart: async () => {
         try {
           const { sessionToken } = get();
-          const response = await api.get('/cart', {
+          const res = await api.get('/cart', {
             headers: sessionToken ? { 'X-Session-Token': sessionToken } : {}
           });
+
+          // res.data is null when API is offline (our interceptor returns null)
+          if (!res || res.data === null || res.offline) return;
+
           set({
-            items: response.data.items || [],
-            sessionToken: response.data.sessionToken || sessionToken
+            items: res.data.items || [],
+            sessionToken: res.data.sessionToken || sessionToken
           });
-        } catch (error) {
-          // API is offline or DB not connected — just use localStorage items silently
-          console.warn('Cart sync skipped (API unavailable):', error.message);
+        } catch {
+          // API error — silently keep localStorage items
         }
       },
 
       clearCart: async () => {
-        set({ loading: true });
+        set({ items: [], loading: true });
         try {
           await api.delete('/cart');
-          set({ items: [] });
-        } catch (error) {
-          set({ error: error.response?.data?.message || 'Failed to clear cart' });
+        } catch {
+          // Already cleared locally
         } finally {
           set({ loading: false });
         }
       },
 
-      getTotal: () => {
-        return get().items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-      },
+      getTotal: () =>
+        get().items.reduce((sum, item) => sum + (item.subtotal || 0), 0),
 
-      getItemCount: () => {
-        return get().items.reduce((sum, item) => sum + item.quantity, 0);
-      }
+      getItemCount: () =>
+        get().items.reduce((sum, item) => sum + item.quantity, 0)
     }),
     {
       name: 'cart-storage',
       storage: createJSONStorage(() =>
-        typeof window !== 'undefined' ? localStorage : {
-          getItem: () => null,
-          setItem: () => {},
-          removeItem: () => {}
-        }
+        typeof window !== 'undefined'
+          ? localStorage
+          : { getItem: () => null, setItem: () => {}, removeItem: () => {} }
       ),
-      partialize: (state) => ({ items: state.items, sessionToken: state.sessionToken })
+      partialize: (state) => ({
+        items: state.items,
+        sessionToken: state.sessionToken
+      })
     }
   )
 );
