@@ -10,7 +10,6 @@ const useCartStore = create(
       loading: false,
       error: null,
 
-      // Add item to cart
       addItem: async (productId, quantity = 1, variantId = null) => {
         set({ loading: true, error: null });
         try {
@@ -22,8 +21,6 @@ const useCartStore = create(
           }, {
             headers: sessionToken ? { 'X-Session-Token': sessionToken } : {}
           });
-
-          // Refresh cart
           await get().fetchCart();
         } catch (error) {
           set({ error: error.response?.data?.message || 'Failed to add item' });
@@ -32,7 +29,6 @@ const useCartStore = create(
         }
       },
 
-      // Remove item from cart
       removeItem: async (itemId) => {
         set({ loading: true });
         try {
@@ -45,7 +41,6 @@ const useCartStore = create(
         }
       },
 
-      // Update item quantity
       updateItemQuantity: async (itemId, quantity) => {
         set({ loading: true });
         try {
@@ -58,24 +53,23 @@ const useCartStore = create(
         }
       },
 
-      // Fetch cart from server
+      // Silently fetch cart — never throws, never crashes the page
       fetchCart: async () => {
         try {
           const { sessionToken } = get();
           const response = await api.get('/cart', {
             headers: sessionToken ? { 'X-Session-Token': sessionToken } : {}
           });
-
           set({
             items: response.data.items || [],
             sessionToken: response.data.sessionToken || sessionToken
           });
         } catch (error) {
-          console.error('Failed to fetch cart:', error);
+          // API is offline or DB not connected — just use localStorage items silently
+          console.warn('Cart sync skipped (API unavailable):', error.message);
         }
       },
 
-      // Clear cart
       clearCart: async () => {
         set({ loading: true });
         try {
@@ -88,19 +82,23 @@ const useCartStore = create(
         }
       },
 
-      // Get cart total
       getTotal: () => {
         return get().items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
       },
 
-      // Get item count
       getItemCount: () => {
         return get().items.reduce((sum, item) => sum + item.quantity, 0);
       }
     }),
     {
       name: 'cart-storage',
-      storage: createJSONStorage(() => typeof window !== 'undefined' ? localStorage : null),
+      storage: createJSONStorage(() =>
+        typeof window !== 'undefined' ? localStorage : {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {}
+        }
+      ),
       partialize: (state) => ({ items: state.items, sessionToken: state.sessionToken })
     }
   )

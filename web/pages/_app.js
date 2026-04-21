@@ -8,10 +8,20 @@ export default function App({ Component, pageProps }) {
   const fetchCart = useCartStore((state) => state.fetchCart);
 
   useEffect(() => {
-    // Rehydrate auth token from localStorage on app load
+    // Rehydrate JWT from localStorage
     hydrateAuth();
-    // Sync cart from server
-    fetchCart();
+
+    // Only sync cart with server if API is likely running
+    // (avoids the AxiosError 500 splash when API is offline)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    fetch(`${apiUrl.replace('/api', '')}/health`)
+      .then((res) => {
+        if (res.ok) fetchCart();
+      })
+      .catch(() => {
+        // API not running — cart works from localStorage only
+        console.warn('API server not reachable. Cart running in offline mode.');
+      });
   }, []);
 
   return <Component {...pageProps} />;
