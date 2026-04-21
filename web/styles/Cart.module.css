@@ -53,7 +53,7 @@
 .items {
   display: flex;
   flex-direction: column;
-  divide-y divide-gray-200;
+  border-top: 1px solid #e5e7eb;
 }
 
 .item {
