@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '@/lib/api';
 import useCartStore from '@/store/cartStore';
+import Layout from '@/components/Layout';
 import styles from '@/styles/Product.module.css';
 
 export default function ProductDetail() {
@@ -62,7 +63,8 @@ export default function ProductDetail() {
     : 0;
 
   return (
-    <div className={styles.container}>
+    <Layout title={product?.name} description={product?.description}>
+      <div className={styles.container}>
       <nav className={styles.breadcrumb}>
         <Link href="/catalog">Catalog</Link>
         <span>/</span>
@@ -236,5 +238,6 @@ export default function ProductDetail() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

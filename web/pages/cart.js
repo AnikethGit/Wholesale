@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
+import Layout from '@/components/Layout';
 import styles from '@/styles/Cart.module.css';
 
 export default function CartPage() {
@@ -52,7 +53,8 @@ export default function CartPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <Layout title="Shopping Cart" description="View and manage your shopping cart">
+      <div className={styles.container}>
       <div className={styles.header}>
         <h1>Shopping Cart</h1>
         <p>{items.length} item{items.length !== 1 ? 's' : ''} in your cart</p>
@@ -216,5 +218,6 @@ export default function CartPage() {
         </div>
       </section>
     </div>
+    </Layout>
   );
 }

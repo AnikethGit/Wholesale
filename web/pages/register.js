@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/authStore';
+import Layout from '@/components/Layout';
 import styles from '@/styles/Auth.module.css';
 
 export default function Register() {
@@ -62,7 +63,8 @@ export default function Register() {
   };
 
   return (
-    <div className={styles.container}>
+    <Layout title="Create Account" description="Sign up for a TechWholesale account">
+      <div className={styles.container}>
       <div className={styles.formWrapper}>
         <div className={styles.formBox}>
           <h1>Create Account</h1>
@@ -180,5 +182,6 @@ export default function Register() {
         </div>
       </div>
     </div>
+    </Layout>
   );
 }

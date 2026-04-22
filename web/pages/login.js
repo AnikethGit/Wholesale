@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/authStore';
+import Layout from '@/components/Layout';
 import styles from '@/styles/Auth.module.css';
 
 export default function Login() {
@@ -48,7 +49,8 @@ export default function Login() {
   };
 
   return (
-    <div className={styles.container}>
+    <Layout title="Sign In" description="Sign in to your TechWholesale account">
+      <div className={styles.container}>
       <div className={styles.formWrapper}>
         <div className={styles.formBox}>
           <h1>Welcome Back</h1>
@@ -132,5 +134,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+    </Layout>
   );
 }

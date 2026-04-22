@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/authStore';
 import api from '@/lib/api';
+import Layout from '@/components/Layout';
 import styles from '@/styles/Account.module.css';
 
 export default function AccountDashboard() {
@@ -47,7 +48,8 @@ export default function AccountDashboard() {
   }
 
   return (
-    <div className={styles.container}>
+    <Layout title="My Account" description="View your account dashboard">
+      <div className={styles.container}>
       <div className={styles.header}>
         <h1>My Account</h1>
         <p>Welcome, {profile?.first_name}!</p>
@@ -214,5 +216,6 @@ export default function AccountDashboard() {
         </main>
       </div>
     </div>
+    </Layout>
   );
 }

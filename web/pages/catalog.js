@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Layout from '@/components/Layout';
 import api from '@/lib/api';
 import styles from '@/styles/Catalog.module.css';
 
@@ -73,7 +74,8 @@ export default function Catalog() {
   };
 
   return (
-    <div className={styles.container}>
+    <Layout title="Shop Products" description="Browse our complete product catalog">
+      <div className={styles.container}>
       <div className={styles.header}>
         <h1>Shop Products</h1>
         <p>Find exactly what you're looking for</p>
@@ -232,5 +234,6 @@ export default function Catalog() {
         </main>
       </div>
     </div>
+    </Layout>
   );
 }

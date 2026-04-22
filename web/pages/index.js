@@ -1,101 +1,32 @@
-import Head from 'next/head';
 import Link from 'next/link';
+import { useState } from 'react';
+import Layout from '@/components/Layout';
 import useCartStore from '@/store/cartStore';
 import styles from '@/styles/Home.module.css';
 
 export default function Home() {
-  const { items, addItem } = useCartStore();
-
-  const cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
-  const cartTotal = items.reduce((sum, i) => sum + (i.subtotal || 0), 0);
-
-  const prices = {
-    'Samsung Galaxy S24 Ultra 256GB': 899,
-    'Bose S1 Pro+ Bluetooth Speaker': 549,
-    'Sony WH-1000XM5 Noise Cancelling': 279,
-    'MacBook Pro M3 14" 512GB': 1749,
-    'iPhone 16 Pro 128GB Natural Titanium': 999,
-    'NVIDIA RTX 4070 Super 12GB GDDR6X': 599,
-    'Anker 240W USB-C Charging Hub 6-Port': 79,
-    'Apple Watch Series 10 45mm GPS+Cell': 449
-  };
+  const { addItem } = useCartStore();
+  const [addedProduct, setAddedProduct] = useState(null);
 
   const products = [
-    { id: 1, name: 'Samsung Galaxy S24 Ultra 256GB', category: 'Smartphones', rating: 5, reviews: 284, badge: 'Hot', badgeType: 'hot', icon: '📱', bg: '#1a2340' },
-    { id: 2, name: 'Bose S1 Pro+ Bluetooth Speaker', category: 'Audio', rating: 5, reviews: 142, badge: 'New', icon: '🎵', bg: '#1e3a2f' },
-    { id: 3, name: 'Sony WH-1000XM5 Noise Cancelling', category: 'Earbuds', rating: 5, reviews: 519, badge: 'Sale', icon: '🎧', bg: '#2a1a3d' },
-    { id: 4, name: 'MacBook Pro M3 14" 512GB', category: 'Laptops', rating: 5, reviews: 87, badge: 'Hot', badgeType: 'hot', icon: '💻', bg: '#3d1a1a' },
-    { id: 5, name: 'iPhone 16 Pro 128GB Natural Titanium', category: 'Smartphones', rating: 4, reviews: 203, badge: 'New', icon: '📱', bg: '#1a2a3d' },
-    { id: 6, name: 'NVIDIA RTX 4070 Super 12GB GDDR6X', category: 'Computer Parts', rating: 5, reviews: 76, icon: '🖥️', bg: '#1e2a1a' },
-    { id: 7, name: 'Anker 240W USB-C Charging Hub 6-Port', category: 'Accessories', rating: 4, reviews: 338, badge: 'Sale', icon: '🔌', bg: '#3d2a1a' },
-    { id: 8, name: 'Apple Watch Series 10 45mm GPS+Cell', category: 'Wearables', rating: 5, reviews: 194, badge: 'Hot', badgeType: 'hot', icon: '⌚', bg: '#1a1a2a' }
+    { id: 1, name: 'Samsung Galaxy S24 Ultra 256GB', category: 'Smartphones', price: 899, rating: 5, reviews: 284, badge: 'Hot', icon: '📱', bg: '#1a2340' },
+    { id: 2, name: 'Bose S1 Pro+ Bluetooth Speaker', category: 'Audio', price: 549, rating: 5, reviews: 142, badge: 'New', icon: '🎵', bg: '#1e3a2f' },
+    { id: 3, name: 'Sony WH-1000XM5 Noise Cancelling', category: 'Earbuds', price: 279, rating: 5, reviews: 519, badge: 'Sale', icon: '🎧', bg: '#2a1a3d' },
+    { id: 4, name: 'MacBook Pro M3 14" 512GB', category: 'Laptops', price: 1749, rating: 5, reviews: 87, badge: 'Hot', icon: '💻', bg: '#3d1a1a' },
+    { id: 5, name: 'iPhone 16 Pro 128GB Natural Titanium', category: 'Smartphones', price: 999, rating: 4, reviews: 203, badge: 'New', icon: '📱', bg: '#1a2a3d' },
+    { id: 6, name: 'NVIDIA RTX 4070 Super 12GB GDDR6X', category: 'Computer Parts', price: 599, rating: 5, reviews: 76, icon: '🖥️', bg: '#1e2a1a' },
+    { id: 7, name: 'Anker 240W USB-C Charging Hub 6-Port', category: 'Accessories', price: 79, rating: 4, reviews: 338, badge: 'Sale', icon: '🔌', bg: '#3d2a1a' },
+    { id: 8, name: 'Apple Watch Series 10 45mm GPS+Cell', category: 'Wearables', price: 449, rating: 5, reviews: 194, badge: 'Hot', icon: '⌚', bg: '#1a1a2a' }
   ];
 
-  const handleAddToCart = async (productName) => {
-    const price = prices[productName];
-    // For demo, directly update local store
-    useCartStore.setState((state) => ({
-      items: (() => {
-        const existing = state.items.find(i => i.product_name === productName);
-        if (existing) {
-          return state.items.map(i =>
-            i.product_name === productName
-              ? { ...i, quantity: i.quantity + 1, subtotal: (i.quantity + 1) * i.unit_price }
-              : i
-          );
-        }
-        return [...state.items, {
-          id: Date.now(),
-          product_name: productName,
-          product_sku: 'DEMO',
-          unit_price: price,
-          quantity: 1,
-          subtotal: price
-        }];
-      })()
-    }));
+  const handleAddToCart = (product) => {
+    addItem(product.id, 1);
+    setAddedProduct(product.id);
+    setTimeout(() => setAddedProduct(null), 2000);
   };
 
   return (
-    <>
-      <Head>
-        <title>TechWholesale — Where Quality Meets Wholesale Value</title>
-        <meta name="description" content="Premium tech products at wholesale prices." />
-      </Head>
-
-      {/* TOP BAR */}
-      <div className={styles.topbar}>
-        🚚 Free shipping on orders over <span>$150</span> &nbsp;|&nbsp; Wholesale pricing on bulk orders &nbsp;|&nbsp; 30-day returns
-      </div>
-
-      {/* HEADER */}
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <Link href="/" className={styles.logo}>Tech<span>Whole</span>sale</Link>
-          <nav className={styles.nav}>
-            <Link href="/" className={styles.active}>Home</Link>
-            <Link href="/catalog?category=smartphones">Phones</Link>
-            <Link href="/catalog?category=earbuds-audio">Audio</Link>
-            <Link href="/catalog?category=laptops">Laptops</Link>
-            <Link href="/catalog?category=accessories">Accessories</Link>
-            <Link href="/catalog">Wholesale</Link>
-          </nav>
-          <div className={styles.headerRight}>
-            <div className={styles.searchBar}>
-              <i className="fas fa-search" />
-              <input type="text" placeholder="Search products..." onKeyDown={(e) => {
-                if (e.key === 'Enter') window.location.href = `/catalog?search=${e.target.value}`;
-              }} />
-            </div>
-            <Link href="/cart" className={styles.cartBtn}>
-              <i className="fas fa-shopping-cart" />
-              ${cartTotal.toFixed(2)}
-              {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
-            </Link>
-          </div>
-        </div>
-      </header>
-
+    <Layout>
       {/* HERO */}
       <section className={styles.hero}>
         <div className={styles.heroGrid} />
@@ -130,44 +61,99 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TRENDING PRODUCTS */}
-      <section className={styles.trendingSection} id="trending">
-        <div className={styles.trendingInner}>
-          <div className={styles.trendingHeader}>
-            <div>
-              <div className={styles.sectionLabel}>What's Hot</div>
-              <h2 className={styles.sectionTitle}>Trending <em>Right Now</em></h2>
-              <p className={styles.sectionSub}>Our best-selling products this season</p>
-            </div>
-            <Link href="/catalog" className={styles.viewAll}>View all products →</Link>
+      {/* FEATURED PRODUCTS */}
+      <section className={styles.featured}>
+        <div className={styles.inner}>
+          <div className={styles.sectionHead}>
+            <h2>Featured Products</h2>
+            <p>Handpicked bestsellers at wholesale prices</p>
           </div>
 
-          <div className={styles.productsGrid}>
-            {products.map((p) => (
-              <div key={p.id} className={styles.productCard}>
-                <div className={styles.productImgWrap} style={{ background: `linear-gradient(135deg, ${p.bg} 0%, ${p.bg}dd 100%)` }}>
-                  <div className={styles.productIcon}>{p.icon}</div>
-                  {p.badge && (
-                    <span className={`${styles.productBadge} ${p.badgeType === 'hot' ? styles.hot : ''}`}>{p.badge}</span>
-                  )}
+          <div className={styles.productGrid}>
+            {products.map((product) => (
+              <div key={product.id} className={styles.productCard} style={{ background: product.bg }}>
+                {product.badge && <span className={`${styles.badge} ${styles[product.badge.toLowerCase()]}`}>{product.badge}</span>}
+                <div className={styles.productIcon}>{product.icon}</div>
+                <div className={styles.productInfo}>
+                  <div className={styles.productName}>{product.name}</div>
+                  <div className={styles.productCategory}>{product.category}</div>
+                  <div className={styles.productRating}>
+                    {[...Array(product.rating)].map((_, i) => <span key={i}>⭐</span>)}
+                    <span className={styles.reviews}>({product.reviews})</span>
+                  </div>
+                  <div className={styles.productPrice}>${product.price}</div>
+                  <button
+                    className={`${styles.addBtn} ${addedProduct === product.id ? styles.added : ''}`}
+                    onClick={() => handleAddToCart(product)}
+                  >
+                    {addedProduct === product.id ? '✓ Added' : 'Add to Cart'}
+                  </button>
                 </div>
-                <div className={styles.productBody}>
-                  <div className={styles.productCat}>{p.category}</div>
-                  <div className={styles.productName}>{p.name}</div>
-                  <div className={styles.productStars}>
-                    {'★'.repeat(p.rating)}{'☆'.repeat(5 - p.rating)} <span>({p.reviews})</span>
-                  </div>
-                  <div className={styles.productFooter}>
-                    <div>
-                      <div className={styles.productPrice}>${prices[p.name]}</div>
-                    </div>
-                    <button
-                      className={styles.addCartBtn}
-                      onClick={() => handleAddToCart(p.name)}
-                    >
-                      + Add
-                    </button>
-                  </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.viewAll}>
+            <Link href="/catalog" className={styles.viewAllLink}>View all products →</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CATEGORIES */}
+      <section className={styles.categories}>
+        <div className={styles.inner}>
+          <div className={styles.sectionHead}>
+            <h2>Shop by Category</h2>
+            <p>Browse our curated collections</p>
+          </div>
+          <div className={styles.categoryGrid}>
+            {[
+              { name: 'Smartphones', icon: '📱', href: '/catalog?category=smartphones' },
+              { name: 'Laptops & Desktops', icon: '💻', href: '/catalog?category=laptops' },
+              { name: 'Audio & Headphones', icon: '🎧', href: '/catalog?category=earbuds-audio' },
+              { name: 'Accessories', icon: '🔌', href: '/catalog?category=accessories' },
+              { name: 'Computer Parts', icon: '🖥️', href: '/catalog?category=computer-parts' },
+              { name: 'Wearables', icon: '⌚', href: '/catalog?category=wearables' },
+            ].map((cat) => (
+              <Link key={cat.name} href={cat.href} className={styles.categoryCard}>
+                <div className={styles.categoryIcon}>{cat.icon}</div>
+                <span>{cat.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA SECTION */}
+      <section className={styles.ctaSection}>
+        <div className={styles.inner}>
+          <div className={styles.ctaContent}>
+            <h2>Wholesale Pricing for B2B Customers</h2>
+            <p>Join our wholesale program and enjoy bulk discounts on all products. Perfect for resellers, retailers, and corporate bulk purchases.</p>
+            <Link href="/register" className={styles.btnAccent}>Apply for Wholesale Access</Link>
+          </div>
+          <div className={styles.ctaImage}>📦</div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className={styles.testimonials}>
+        <div className={styles.inner}>
+          <div className={styles.sectionHead}>
+            <h2>What Our Customers Say</h2>
+          </div>
+          <div className={styles.testimonialGrid}>
+            {[
+              { name: 'Alex Johnson', role: 'Tech Reviewer', text: 'TechWholesale offers the best prices I\'ve found. Their service is fast and reliable.' },
+              { name: 'Sarah Chen', role: 'Retail Store Owner', text: 'As a retailer, the wholesale pricing has transformed my margins. Highly recommended!' },
+              { name: 'Marcus Rodriguez', role: 'B2B Manager', text: 'Professional, responsive, and competitive pricing. We\'ve found our new supplier.' }
+            ].map((t) => (
+              <div key={t.name} className={styles.testimonialCard}>
+                <div className={styles.testimonialRating}>{'⭐'.repeat(5)}</div>
+                <p className={styles.testimonialText}>"{t.text}"</p>
+                <div className={styles.testimonialAuthor}>
+                  <strong>{t.name}</strong>
+                  <span>{t.role}</span>
                 </div>
               </div>
             ))}
@@ -175,56 +161,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PROMO BANNER */}
-      <section className={styles.promoBanner}>
-        <div className={styles.promoBannerInner}>
-          <div className={styles.promoTag}>Wholesale Program</div>
-          <h2>Buy More, Save More</h2>
-          <p>Join our wholesale program and unlock tiered pricing on bulk orders. Perfect for retailers, resellers, and businesses.</p>
-          <Link href="/register" className={styles.btnAccent}>Apply for Wholesale Access</Link>
+      {/* FAQ */}
+      <section className={styles.faq}>
+        <div className={styles.inner}>
+          <div className={styles.sectionHead}>
+            <h2>Frequently Asked Questions</h2>
+          </div>
+          <div className={styles.faqGrid}>
+            {[
+              { q: 'Do you offer bulk discounts?', a: 'Yes! We offer tiered wholesale pricing for bulk orders. Contact us for a custom quote.' },
+              { q: 'How fast is shipping?', a: 'Most orders ship within 24 hours. Standard delivery is 2–5 business days.' },
+              { q: 'What\'s your return policy?', a: '30-day hassle-free returns on all products in original condition.' },
+              { q: 'Do you ship internationally?', a: 'Yes, we ship to most countries. International orders may incur additional shipping fees.' }
+            ].map((item, i) => (
+              <div key={i} className={styles.faqItem}>
+                <h4>{item.q}</h4>
+                <p>{item.a}</p>
+              </div>
+            ))}
+          </div>
+          <div className={styles.faqLink}>
+            <Link href="/help/faq">View All FAQs →</Link>
+          </div>
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className={styles.footer}>
-        <div className={styles.footerMain}>
-          <div>
-            <Link href="/" className={styles.footerLogo}>Tech<span>Whole</span>sale</Link>
-            <p className={styles.footerBio}>Your trusted source for premium tech at wholesale prices.</p>
-          </div>
-          <div className={styles.footerCol}>
-            <h4>Products</h4>
-            <ul>
-              {['Phones','Earbuds & Audio','Phone Cases','Laptops','Computer Parts','Wearables'].map(i => (
-                <li key={i}><Link href="/catalog">{i}</Link></li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.footerCol}>
-            <h4>Support</h4>
-            <ul>
-              {['Privacy Policy','Shipping Policy','Return Policy','Terms & Conditions','FAQ'].map(i => (
-                <li key={i}><a href="#">{i}</a></li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.footerCol}>
-            <h4>Contact Us</h4>
-            <div className={styles.footerContact}>
-              <p><i className="fas fa-envelope" /> hello@techwholesale.com</p>
-              <p><i className="fas fa-phone" /> +1 (800) 555-TECH</p>
-              <p><i className="fas fa-clock" /> Mon–Fri: 9am – 6pm PST</p>
-            </div>
-          </div>
-        </div>
-        <div className={styles.footerBottom}>
-          <div>© 2026 <span>TechWholesale</span>. All rights reserved.</div>
-          <div className={styles.footerLegal}>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-          </div>
-        </div>
-      </footer>
-    </>
+    </Layout>
   );
 }

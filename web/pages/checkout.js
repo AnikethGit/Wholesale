@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Layout from '@/components/Layout';
 import api from '@/lib/api';
 import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
@@ -153,7 +154,8 @@ export default function Checkout() {
   const total = subtotal + tax + shipping;
 
   return (
-    <div className={styles.container}>
+    <Layout title="Checkout" description="Complete your purchase securely">
+      <div className={styles.container}>
       <div className={styles.checkoutMain}>
         {/* Steps Progress */}
         <div className={styles.progress}>
@@ -539,5 +541,6 @@ export default function Checkout() {
         )}
       </aside>
     </div>
+    </Layout>
   );
 }
