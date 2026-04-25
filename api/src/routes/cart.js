@@ -48,7 +48,7 @@ router.get('/', optionalAuthMiddleware, async (req, res, next) => {
 
     // Get cart items
     const [items] = await connection.query(
-      `SELECT ci.*, p.name, p.image_url 
+      `SELECT ci.*, p.name AS product_name, p.sku AS product_sku, p.image_url 
        FROM cart_items ci 
        JOIN products p ON ci.product_id = p.id 
        WHERE ci.cart_id = ?`,
