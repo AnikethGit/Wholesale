@@ -28,19 +28,16 @@ router.get('/', [
     let query = 'SELECT * FROM products WHERE is_active = TRUE';
     const params = [];
 
-    // Search
     if (search) {
       query += ' AND (name LIKE ? OR description LIKE ?)';
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    // Category filter
     if (category) {
       query += ' AND category_id = (SELECT id FROM categories WHERE slug = ?)';
       params.push(category);
     }
 
-    // Price filter
     if (minPrice !== undefined) {
       query += ' AND price >= ?';
       params.push(minPrice);
@@ -50,7 +47,6 @@ router.get('/', [
       params.push(maxPrice);
     }
 
-    // Sorting
     const sortMap = {
       'price_asc': 'price ASC',
       'price_desc': 'price DESC',
@@ -59,14 +55,12 @@ router.get('/', [
     };
     query += ` ORDER BY ${sortMap[sort] || 'created_at DESC'}`;
 
-    // Count total
     const [countResult] = await connection.query(
       `SELECT COUNT(*) as total FROM (${query}) as filtered`,
       params
     );
     const total = countResult[0].total;
 
-    // Fetch products
     query += ` LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
@@ -83,7 +77,52 @@ router.get('/', [
   }
 });
 
-// Get single product
+// Get featured products — must be before /:id
+router.get('/featured', optionalAuthMiddleware, async (req, res, next) => {
+  try {
+    const connection = await pool.getConnection();
+    const [products] = await connection.query(
+      'SELECT * FROM products WHERE is_featured = TRUE AND is_active = TRUE LIMIT 8',
+      []
+    );
+    connection.release();
+    res.json({ data: products });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get trending products — must be before /:id
+router.get('/trending', optionalAuthMiddleware, async (req, res, next) => {
+  try {
+    const connection = await pool.getConnection();
+    const [products] = await connection.query(
+      `SELECT p.* FROM products p ORDER BY p.review_count DESC, p.rating DESC LIMIT 8`,
+      []
+    );
+    connection.release();
+    res.json({ data: products });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get categories — must be before /:id
+router.get('/categories/list', async (req, res, next) => {
+  try {
+    const connection = await pool.getConnection();
+    const [categories] = await connection.query(
+      'SELECT id, name, slug, image_url FROM categories WHERE is_active = TRUE ORDER BY name',
+      []
+    );
+    connection.release();
+    res.json({ data: categories });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get single product — must be after all named routes
 router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -104,13 +143,11 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
 
     const product = products[0];
 
-    // Get variants
     const [variants] = await connection.query(
       'SELECT * FROM product_variants WHERE product_id = ? AND is_active = TRUE',
       [id]
     );
 
-    // Get reviews
     const [reviews] = await connection.query(
       `SELECT r.*, u.first_name, u.last_name 
        FROM reviews r 
@@ -131,62 +168,6 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
         reviews
       }
     });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Get featured products
-router.get('/featured', optionalAuthMiddleware, async (req, res, next) => {
-  try {
-    const connection = await pool.getConnection();
-
-    const [products] = await connection.query(
-      'SELECT * FROM products WHERE is_featured = TRUE AND is_active = TRUE LIMIT 8',
-      []
-    );
-
-    connection.release();
-
-    res.json({ data: products });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Get trending products
-router.get('/trending', optionalAuthMiddleware, async (req, res, next) => {
-  try {
-    const connection = await pool.getConnection();
-
-    const [products] = await connection.query(
-      `SELECT p.* FROM products p
-       ORDER BY p.review_count DESC, p.rating DESC
-       LIMIT 8`,
-      []
-    );
-
-    connection.release();
-
-    res.json({ data: products });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Get categories
-router.get('/categories/list', async (req, res, next) => {
-  try {
-    const connection = await pool.getConnection();
-
-    const [categories] = await connection.query(
-      'SELECT id, name, slug, image_url FROM categories WHERE is_active = TRUE ORDER BY name',
-      []
-    );
-
-    connection.release();
-
-    res.json({ data: categories });
   } catch (error) {
     next(error);
   }
