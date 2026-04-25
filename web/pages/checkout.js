@@ -128,6 +128,10 @@ export default function Checkout() {
         billing_address: formData.same_as_shipping ? formData.shipping_address : formData.billing_address
       });
 
+      if (!sessionResponse.data?.sessionToken) {
+        throw new Error(sessionResponse.data?.message || 'Failed to create checkout session');
+      }
+
       // Process payment
       const paymentResponse = await api.post('/checkout/payment', {
         sessionToken: sessionResponse.data.sessionToken,
@@ -135,6 +139,10 @@ export default function Checkout() {
         card_number: formData.card_number,
         cvv: formData.cvv
       });
+
+      if (!paymentResponse.data?.success) {
+        throw new Error(paymentResponse.data?.message || 'Payment failed');
+      }
 
       setOrderId(paymentResponse.data.order.id);
       setStep('confirmation');

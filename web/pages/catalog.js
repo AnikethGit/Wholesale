@@ -26,7 +26,7 @@ export default function Catalog() {
     const fetchCategories = async () => {
       try {
         const response = await api.get('/products/categories/list');
-        setCategories(response.data.data);
+        if (response.data) setCategories(response.data.data || []);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
       }
@@ -49,8 +49,10 @@ export default function Catalog() {
         params.append('limit', pagination.limit);
 
         const response = await api.get(`/products?${params.toString()}`);
-        setProducts(response.data.data);
-        setPagination(response.data.pagination);
+        if (response.data) {
+          setProducts(response.data.data || []);
+          setPagination(response.data.pagination || { page: 1, limit: 12, total: 0, pages: 0 });
+        }
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {

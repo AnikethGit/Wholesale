@@ -23,9 +23,11 @@ export default function ProductDetail() {
     const fetchProduct = async () => {
       try {
         const response = await api.get(`/products/${id}`);
-        setProduct(response.data.product);
-        if (response.data.product.variants?.length > 0) {
-          setSelectedVariant(response.data.product.variants[0]);
+        if (response.data) {
+          setProduct(response.data.product);
+          if (response.data.product?.variants?.length > 0) {
+            setSelectedVariant(response.data.product.variants[0]);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch product:', error);
