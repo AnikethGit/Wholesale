@@ -44,7 +44,11 @@ export default function AccountDashboard() {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading your account...</div>;
+    return (
+      <Layout title="My Account">
+        <div className={styles.loading}>Loading your account...</div>
+      </Layout>
+    );
   }
 
   return (
