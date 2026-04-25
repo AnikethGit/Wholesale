@@ -43,11 +43,10 @@ export default function ProductDetail() {
     setAddingToCart(true);
     try {
       await addItem(product.id, quantity, selectedVariant?.id);
-      // Show success message
-      alert('Added to cart!');
+      setAddingToCart('added');
+      setTimeout(() => setAddingToCart(false), 2000);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-    } finally {
       setAddingToCart(false);
     }
   };
@@ -177,9 +176,9 @@ export default function ProductDetail() {
             <button
               className={styles.addToCartBtn}
               onClick={handleAddToCart}
-              disabled={addingToCart || product.quantity <= 0}
+              disabled={addingToCart === true || product.quantity <= 0}
             >
-              {product.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
+              {product.quantity <= 0 ? 'Out of Stock' : addingToCart === 'added' ? '✓ Added to Cart' : 'Add to Cart'}
             </button>
           </div>
 

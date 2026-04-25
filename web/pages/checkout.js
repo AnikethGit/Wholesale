@@ -49,7 +49,10 @@ export default function Checkout() {
     if (items.length === 0) {
       router.push('/cart');
     }
-  }, [items, router]);
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/checkout');
+    }
+  }, [items, isAuthenticated, router]);
 
   const handleInputChange = (e, section = null) => {
     const { name, value } = e.target;
