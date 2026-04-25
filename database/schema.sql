@@ -367,6 +367,17 @@ INSERT INTO categories (name, slug, description, is_active) VALUES
 ('Computer Parts', 'computer-parts', 'CPU, GPU, RAM and other components', TRUE),
 ('Wearables', 'wearables', 'Smartwatches and fitness trackers', TRUE);
 
--- Create a sample admin user (password: admin123, hashed with bcrypt)
+-- Create a sample admin user (password: admin123)
 INSERT INTO users (email, password_hash, first_name, last_name, role, is_active, email_verified) VALUES
-('admin@techwholesale.com', '$2b$10$YQv8r8s0N0E6x1Q5L9K8uuU5K5K5K5K5K5K5K5K5K5K5K5K5K5K5K5', 'Admin', 'User', 'admin', TRUE, TRUE);
+('admin@techwholesale.com', '$2b$10$cCSMmYJktTO99R8WCXgIh.xpHPvrpyIC0bYalhkAOoieG5ORyi.da', 'Admin', 'User', 'admin', TRUE, TRUE);
+
+-- Sample products matching homepage hardcoded IDs 1-8
+INSERT INTO products (id, category_id, sku, name, slug, description, short_description, price, compare_at_price, quantity, is_featured, rating, review_count) VALUES
+(1, 1, 'SAM-S24U-256', 'Samsung Galaxy S24 Ultra 256GB', 'samsung-galaxy-s24-ultra-256gb', 'The Samsung Galaxy S24 Ultra features a 6.8-inch Dynamic AMOLED display, Snapdragon 8 Gen 3, and a 200MP camera system.', 'Flagship Samsung phone with S Pen and 200MP camera', 899.00, 1099.00, 50, TRUE, 4.9, 284),
+(2, 2, 'BOSE-S1PRO', 'Bose S1 Pro+ Bluetooth Speaker', 'bose-s1-pro-bluetooth-speaker', 'The Bose S1 Pro+ is a portable PA system and practice amp with multi-position design and up to 11 hours battery life.', 'Portable PA system with powerful sound', 549.00, 649.00, 30, TRUE, 4.8, 142),
+(3, 2, 'SONY-WH1000XM5', 'Sony WH-1000XM5 Noise Cancelling', 'sony-wh-1000xm5-noise-cancelling', 'Industry-leading noise cancellation with 30-hour battery, multipoint connection, and crystal-clear hands-free calling.', 'Best-in-class noise cancelling headphones', 279.00, 349.00, 75, TRUE, 4.9, 519),
+(4, 3, 'APPLE-MBP14-M3', 'MacBook Pro M3 14" 512GB', 'macbook-pro-m3-14-512gb', 'MacBook Pro 14-inch with M3 chip, 8GB RAM, 512GB SSD. Up to 22 hours battery. Liquid Retina XDR display.', 'Professional laptop with Apple M3 chip', 1749.00, 1999.00, 20, TRUE, 4.9, 87),
+(5, 1, 'APPLE-IP16PRO-128', 'iPhone 16 Pro 128GB Natural Titanium', 'iphone-16-pro-128gb-natural-titanium', 'iPhone 16 Pro with A18 Pro chip, 48MP camera system, Action button, and titanium design. 6.3-inch Super Retina XDR display.', 'Apple flagship with A18 Pro chip', 999.00, NULL, 40, TRUE, 4.8, 203),
+(6, 5, 'NVIDIA-RTX4070S', 'NVIDIA RTX 4070 Super 12GB GDDR6X', 'nvidia-rtx-4070-super-12gb', 'NVIDIA GeForce RTX 4070 Super with 12GB GDDR6X memory, Ada Lovelace architecture, DLSS 3.', 'High-performance GPU for gaming and creative work', 599.00, 649.00, 15, FALSE, 4.9, 76),
+(7, 4, 'ANKER-240W-HUB', 'Anker 240W USB-C Charging Hub 6-Port', 'anker-240w-usb-c-charging-hub-6-port', '6-in-1 USB-C hub with 240W charging output, 4K HDMI, USB-A 3.0, and SD card reader.', '6-in-1 hub with 240W charging', 79.00, 99.00, 120, FALSE, 4.4, 338),
+(8, 6, 'APPLE-AW10-45', 'Apple Watch Series 10 45mm GPS+Cell', 'apple-watch-series-10-45mm-gps-cell', 'Apple Watch Series 10 with thinnest design ever, advanced health sensors, 18-hour battery, and cellular connectivity.', 'Thinnest Apple Watch with health monitoring', 449.00, 499.00, 35, TRUE, 4.9, 194);
