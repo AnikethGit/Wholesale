@@ -7,6 +7,7 @@ export default function Terms() {
     <Layout title="Terms & Conditions" description="Our terms of service and conditions">
       <div className={styles.container}>
         <div className={styles.header}>
+          <div className={styles.eyebrow}>Policies &amp; Info</div>
           <h1>Terms & Conditions</h1>
           <p>Last updated: April 2026</p>
         </div>

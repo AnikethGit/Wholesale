@@ -182,11 +182,11 @@
 .submitBtn,
 .backBtn {
   padding: var(--spacing-lg);
-  border: none;
-  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  border-radius: 4px;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   cursor: pointer;
@@ -196,12 +196,14 @@
 .nextBtn,
 .submitBtn {
   background: var(--primary);
+  border-color: var(--primary);
   color: var(--white);
 }
 
 .nextBtn:hover,
 .submitBtn:hover {
   background: var(--accent);
+  border-color: var(--accent);
   color: var(--primary);
 }
 
@@ -212,9 +214,9 @@
 }
 
 .backBtn {
-  background: var(--gray-100);
+  background: var(--white);
+  border-color: var(--gray-200);
   color: var(--primary);
-  border: 1px solid var(--gray-200);
 }
 
 .backBtn:hover {

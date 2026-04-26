@@ -133,11 +133,11 @@
   padding: var(--spacing-lg);
   background: var(--primary);
   color: var(--white);
-  border: none;
-  border-radius: var(--radius-md);
+  border: 2px solid var(--primary);
+  border-radius: 4px;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   cursor: pointer;
@@ -146,6 +146,7 @@
 
 .submitBtn:hover:not(:disabled) {
   background: var(--accent);
+  border-color: var(--accent);
   color: var(--primary);
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(86, 207, 225, 0.3);

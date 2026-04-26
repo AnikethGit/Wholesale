@@ -7,6 +7,7 @@ export default function ReturnsPolicy() {
     <Layout title="Returns Policy" description="Easy 30-day returns on all products">
       <div className={styles.container}>
         <div className={styles.header}>
+          <div className={styles.eyebrow}>Policies &amp; Info</div>
           <h1>Returns & Refunds Policy</h1>
           <p>Hassle-free returns within 30 days</p>
         </div>

@@ -7,6 +7,7 @@ export default function ShippingPolicy() {
     <Layout title="Shipping Policy" description="Learn about our shipping options and delivery times">
       <div className={styles.container}>
         <div className={styles.header}>
+          <div className={styles.eyebrow}>Policies &amp; Info</div>
           <h1>Shipping Policy</h1>
           <p>Fast, reliable delivery to your door</p>
         </div>

@@ -7,6 +7,7 @@ export default function PrivacyPolicy() {
     <Layout title="Privacy Policy" description="Our commitment to your data privacy">
       <div className={styles.container}>
         <div className={styles.header}>
+          <div className={styles.eyebrow}>Policies &amp; Info</div>
           <h1>Privacy Policy</h1>
           <p>Last updated: April 2026</p>
         </div>

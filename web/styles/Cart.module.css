@@ -247,7 +247,8 @@
   color: var(--white);
   text-align: center;
   text-decoration: none;
-  border-radius: var(--radius-md);
+  border-radius: 4px;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 13px;
   text-transform: uppercase;
@@ -269,12 +270,13 @@
   color: var(--primary);
   text-align: center;
   text-decoration: none;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 13px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 4px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   transition: all var(--transition-fast);
 }
 

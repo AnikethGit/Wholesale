@@ -76,6 +76,7 @@ export default function FAQ() {
     <Layout title="FAQ" description="Frequently asked questions and answers">
       <div className={styles.container}>
         <div className={styles.header}>
+          <div className={styles.eyebrow}>Help Center</div>
           <h1>Frequently Asked Questions</h1>
           <p>Find answers to common questions about TechWholesale</p>
         </div>
