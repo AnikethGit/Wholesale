@@ -2,11 +2,11 @@ import Head from 'next/head';
 import Header from './Header';
 import Footer from './Footer';
 
-export default function Layout({ children, title = 'TechWholesale', description = 'Premium tech at wholesale prices' }) {
+export default function Layout({ children, title = 'BestWholesale', description = 'Premium products at wholesale prices' }) {
   return (
     <>
       <Head>
-        <title>{title === 'TechWholesale' ? title : `${title} | TechWholesale`}</title>
+        <title>{title === 'BestWholesale' ? title : `${title} | BestWholesale`}</title>
         <meta name="description" content={description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

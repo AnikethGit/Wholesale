@@ -30,10 +30,10 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: 'Home' },
-    { href: '/catalog?category=smartphones', label: 'Phones' },
-    { href: '/catalog?category=earbuds-audio', label: 'Audio' },
-    { href: '/catalog?category=laptops', label: 'Laptops' },
-    { href: '/catalog?category=accessories', label: 'Accessories' },
+    // { href: '/catalog?category=smartphones', label: 'Phones' },
+    // { href: '/catalog?category=earbuds-audio', label: 'Audio' },
+    // { href: '/catalog?category=laptops', label: 'Laptops' },
+    // { href: '/catalog?category=accessories', label: 'Accessories' },
     { href: '/catalog', label: 'All Products' },
   ];
 
@@ -48,7 +48,7 @@ export default function Header() {
         <div className={styles.inner}>
           {/* Logo */}
           <Link href="/" className={styles.logo}>
-            Tech<span>Whole</span>sale
+            Best<span>Whole</span>sale
           </Link>
 
           {/* Desktop Nav */}

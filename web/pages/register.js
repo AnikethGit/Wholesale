@@ -63,12 +63,12 @@ export default function Register() {
   };
 
   return (
-    <Layout title="Create Account" description="Sign up for a TechWholesale account">
+    <Layout title="Create Account" description="Sign up for a BestWholesale account">
       <div className={styles.container}>
       <div className={styles.formWrapper}>
         <div className={styles.formBox}>
           <h1>Create Account</h1>
-          <p className={styles.subtitle}>Join TechWholesale today</p>
+          <p className={styles.subtitle}>Join BestWholesale today</p>
 
           {error && <div className={styles.errorBox}>{error}</div>}
           {errors.submit && <div className={styles.errorBox}>{errors.submit}</div>}
@@ -172,7 +172,7 @@ export default function Register() {
 
         <div className={styles.infoBox}>
           <h2>Join Our Community</h2>
-          <p>Start shopping premium tech products at wholesale prices</p>
+          <p>Start shopping premium products at wholesale prices</p>
           <ul className={styles.benefits}>
             <li>✓ Exclusive member pricing</li>
             <li>✓ Fast & free shipping</li>

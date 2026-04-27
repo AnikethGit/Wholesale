@@ -1,7 +1,7 @@
 {
-  "name": "techwholesale-ecommerce",
+  "name": "bestwholesale-ecommerce",
   "version": "1.0.0",
-  "description": "TechWholesale E-commerce Scaffold - Next.js + Node.js",
+  "description": "BestWholesale E-commerce Scaffold - Next.js + Node.js",
   "private": true,
   "workspaces": [
     "api",
@@ -31,6 +31,6 @@
     "express",
     "mysql"
   ],
-  "author": "TechWholesale",
+  "author": "BestWholesale",
   "license": "MIT"
 }

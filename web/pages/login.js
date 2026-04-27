@@ -123,8 +123,8 @@ export default function Login() {
         </div>
 
         <div className={styles.infoBox}>
-          <h2>TechWholesale</h2>
-          <p>Premium tech products at wholesale prices</p>
+          <h2>BestWholesale</h2>
+          <p>Premium products at wholesale prices</p>
           <ul className={styles.benefits}>
             <li>✓ Free shipping on orders over $150</li>
             <li>✓ Secure checkout with SSL encryption</li>
