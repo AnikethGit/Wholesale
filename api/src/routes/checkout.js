@@ -269,3 +269,43 @@ router.get('/order/:orderId', async (req, res, next) => {
 });
 
 export default router;
+
+// Public invoice data (by order number or ID — used by track page)
+router.get('/order/:orderId/invoice', async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const connection = await pool.getConnection();
+
+    const [orders] = await connection.query(
+      'SELECT * FROM orders WHERE id = ? OR order_number = ?', [orderId, orderId]
+    );
+    if (!orders.length) { connection.release(); return res.status(404).json({ message: 'Order not found' }); }
+
+    const order = orders[0];
+    const [items]    = await connection.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+    const [payments] = await connection.query('SELECT * FROM payments WHERE order_id = ?',   [order.id]);
+    const [shipments]= await connection.query('SELECT * FROM shipments WHERE order_id = ?',  [order.id]);
+
+    let customer = null;
+    if (order.user_id) {
+      const [users] = await connection.query(
+        'SELECT first_name, last_name, email, phone FROM users WHERE id = ?', [order.user_id]
+      );
+      if (users.length) customer = users[0];
+    }
+
+    let parsedNotes = null;
+    try { if (order.notes) parsedNotes = JSON.parse(order.notes); } catch {}
+
+    connection.release();
+
+    res.json({
+      order,
+      items,
+      payment:          payments[0]  || null,
+      shipment:         shipments[0] || null,
+      customer:         customer || parsedNotes?.customer || { email: order.guest_email },
+      shipping_address: parsedNotes?.shipping_address || null,
+    });
+  } catch (error) { next(error); }
+});

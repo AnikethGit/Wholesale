@@ -215,7 +215,17 @@
 .orderTotal span { color: var(--gray-500); }
 .orderTotal strong { font-family: var(--font-heading); font-size: 18px; color: var(--primary); }
 
-.actions { display: flex; gap: 12px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.invoiceBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 22px; border-radius: 4px;
+  font-family: var(--font-heading); font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  text-decoration: none; transition: all var(--transition-fast);
+  background: var(--gold); color: var(--primary);
+  border: 2px solid var(--gold);
+}
+.invoiceBtn:hover { background: #d4a335; border-color: #d4a335; }
 .shopBtn, .ordersBtn {
   padding: 12px 24px;
   border-radius: var(--radius-md);

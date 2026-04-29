@@ -180,6 +180,14 @@ export default function TrackOrder() {
             </div>
 
             <div className={styles.actions}>
+              <a
+                href={`/invoice/${order.order.order_number}`}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.invoiceBtn}
+              >
+                🧾 Download Invoice
+              </a>
               <Link href="/catalog" className={styles.shopBtn}>Continue Shopping</Link>
               <Link href="/account/orders" className={styles.ordersBtn}>View All Orders</Link>
             </div>

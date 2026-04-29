@@ -286,3 +286,154 @@ router.post('/orders/:orderId/shipment', adminMiddleware, [
 });
 
 export default router;
+
+// ── Manual Order Creation ─────────────────────────────────────────────────
+router.post('/orders/manual', adminMiddleware, [
+  body('customer_email').isEmail(),
+  body('customer_first_name').notEmpty(),
+  body('customer_last_name').notEmpty(),
+  body('items').isArray({ min: 1 }),
+  body('items.*.name').notEmpty(),
+  body('items.*.quantity').isInt({ min: 1 }),
+  body('items.*.unit_price').isFloat({ min: 0 }),
+  body('shipping_address').notEmpty(),
+], async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const {
+      customer_email, customer_first_name, customer_last_name, customer_phone,
+      items, shipping_address, billing_address,
+      payment_method = 'manual', payment_status = 'paid',
+      order_status = 'processing', notes
+    } = req.body;
+
+    const connection = await pool.getConnection();
+
+    // Find or create user account for customer
+    let userId = null;
+    const [existingUser] = await connection.query(
+      'SELECT id FROM users WHERE email = ?', [customer_email]
+    );
+    if (existingUser.length > 0) {
+      userId = existingUser[0].id;
+    }
+
+    // Calculate totals from line items
+    const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const taxAmount   = parseFloat(req.body.tax_amount  ?? (subtotal * 0.08).toFixed(2));
+    const shippingCost = parseFloat(req.body.shipping_cost ?? 0);
+    const discountAmount = parseFloat(req.body.discount_amount ?? 0);
+    const total = subtotal + taxAmount + shippingCost - discountAmount;
+
+    const orderNumber = `ORD-MANUAL-${Date.now()}`;
+
+    const [orderResult] = await connection.query(
+      `INSERT INTO orders
+         (order_number, user_id, guest_email, subtotal, tax_amount, shipping_cost,
+          discount_amount, total_amount, status, payment_status, payment_method,
+          payment_gateway, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'manual', ?)`,
+      [
+        orderNumber,
+        userId,
+        userId ? null : customer_email,
+        subtotal, taxAmount, shippingCost, discountAmount, total,
+        order_status, payment_status, payment_method,
+        notes || null
+      ]
+    );
+    const orderId = orderResult.insertId;
+
+    // Insert order items (free-text, no product_id required for manual orders)
+    for (const item of items) {
+      await connection.query(
+        `INSERT INTO order_items
+           (order_id, product_id, variant_id, product_name, product_sku, quantity, unit_price)
+         VALUES (?, ?, NULL, ?, ?, ?, ?)`,
+        [orderId, item.product_id || null, item.name, item.sku || 'MANUAL', item.quantity, item.unit_price]
+      );
+      // Deduct stock only when a real product_id is given
+      if (item.product_id) {
+        await connection.query(
+          'UPDATE products SET quantity = GREATEST(0, quantity - ?) WHERE id = ?',
+          [item.quantity, item.product_id]
+        );
+      }
+    }
+
+    // Record payment
+    const transactionId = `TXN-MANUAL-${Date.now()}`;
+    await connection.query(
+      `INSERT INTO payments
+         (order_id, amount, payment_method, status, gateway_name, transaction_id, processed_at)
+       VALUES (?, ?, ?, ?, 'manual', ?, NOW())`,
+      [orderId, total, payment_method, payment_status === 'paid' ? 'completed' : payment_status, transactionId]
+    );
+
+    // Store shipping address as JSON in notes if no address table row
+    if (shipping_address) {
+      await connection.query(
+        `UPDATE orders SET notes = ? WHERE id = ?`,
+        [JSON.stringify({
+          notes: notes || '',
+          customer: { first_name: customer_first_name, last_name: customer_last_name, email: customer_email, phone: customer_phone },
+          shipping_address,
+          billing_address: billing_address || shipping_address
+        }), orderId]
+      );
+    }
+
+    connection.release();
+
+    res.status(201).json({
+      message: 'Order created',
+      order: { id: orderId, order_number: orderNumber, total }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Invoice Data (admin) ──────────────────────────────────────────────────
+router.get('/orders/:id/invoice', adminMiddleware, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const connection = await pool.getConnection();
+
+    const [orders] = await connection.query(
+      'SELECT * FROM orders WHERE id = ? OR order_number = ?', [id, id]
+    );
+    if (!orders.length) { connection.release(); return res.status(404).json({ message: 'Order not found' }); }
+
+    const order = orders[0];
+    const [items]    = await connection.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+    const [payments] = await connection.query('SELECT * FROM payments WHERE order_id = ?',   [order.id]);
+    const [shipments]= await connection.query('SELECT * FROM shipments WHERE order_id = ?',  [order.id]);
+
+    let customer = null;
+    if (order.user_id) {
+      const [users] = await connection.query(
+        'SELECT first_name, last_name, email, phone FROM users WHERE id = ?', [order.user_id]
+      );
+      if (users.length) customer = users[0];
+    }
+
+    // Parse embedded customer/address from notes if it was a manual order
+    let parsedNotes = null;
+    try { if (order.notes) parsedNotes = JSON.parse(order.notes); } catch {}
+
+    connection.release();
+
+    res.json({
+      order,
+      items,
+      payment:  payments[0]  || null,
+      shipment: shipments[0] || null,
+      customer: customer || parsedNotes?.customer || { email: order.guest_email },
+      shipping_address: parsedNotes?.shipping_address || null,
+      billing_address:  parsedNotes?.billing_address  || null,
+    });
+  } catch (error) { next(error); }
+});
