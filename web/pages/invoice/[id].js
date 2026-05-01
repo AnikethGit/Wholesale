@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import Link from 'next/link';
 import api from '@/lib/api';
-import useAuthStore from '@/store/authStore';
 
 export default function InvoicePage() {
   const router = useRouter();
@@ -16,16 +14,16 @@ export default function InvoicePage() {
 
   useEffect(() => {
     if (!id) return;
-    const isAdmin = isAuthenticated && user?.role === 'admin';
-    const endpoint = isAdmin
-      ? `/admin/orders/${id}/invoice`
-      : `/checkout/order/${id}/invoice`;
-
-    api.get(endpoint).then(res => {
-      if (res.data?.order) setData(res.data);
-      else setError('Invoice not found.');
-    }).catch(() => setError('Could not load invoice.')).finally(() => setLoading(false));
-  }, [id, isAuthenticated, user]);
+    // Always use the public invoice endpoint — it returns all data needed for display.
+    // The admin-only endpoint is reserved for programmatic use only.
+    api.get(`/checkout/order/${id}/invoice`)
+      .then(res => {
+        if (res.data?.order) setData(res.data);
+        else setError('Invoice not found.');
+      })
+      .catch(() => setError('Could not load invoice.'))
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const fmt = (n) => `$${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : '—';
@@ -234,11 +232,8 @@ export default function InvoicePage() {
       <div className="invoice-shell">
         {/* Toolbar */}
         <div className="toolbar">
-          <a
-            href={isAuthenticated && user?.role === 'admin' ? '/admin/orders' : '/track'}
-            className="toolbar-back"
-          >
-            ← {isAuthenticated && user?.role === 'admin' ? 'Back to Orders' : 'Back to Tracking'}
+          <a href="/track" className="toolbar-back">
+            ← Back to Track Order
           </a>
           <div className="toolbar-right">
             <button className="btn-print" onClick={() => window.print()}>

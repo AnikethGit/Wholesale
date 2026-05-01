@@ -25,7 +25,7 @@ router.get('/', [
     const offset = (page - 1) * limit;
     const connection = await pool.getConnection();
 
-    let query = 'SELECT * FROM products WHERE is_active = TRUE';
+    let query = 'SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.is_active = TRUE';
     const params = [];
 
     if (search) {

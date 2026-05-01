@@ -28,9 +28,6 @@ export default function AdminLayout({ children, title = 'Admin' }) {
       <Head>
         <title>{title} — TechWholesale Admin</title>
         <meta name="robots" content="noindex,nofollow" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
       </Head>
 
       <div className={styles.shell}>
