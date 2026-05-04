@@ -147,19 +147,24 @@ body { font-family: var(--font-body); } */
 }
 .topbarRight { display: flex; align-items: center; gap: 12px; }
 .adminBadge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--accent-dark);
   background: rgba(86,207,225,0.1);
   border: 1px solid rgba(86,207,225,0.3);
-  border-radius: 20px;
-  padding: 4px 12px;
+  border-radius: 20px; padding: 4px 12px;
 }
+.createOrderBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px;
+  background: var(--primary); color: var(--white);
+  border-radius: 4px; text-decoration: none;
+  font-family: var(--font-heading); font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  transition: background 0.15s;
+}
+.createOrderBtn:hover { background: var(--accent); color: var(--primary); }
 
 .content {
   padding: 28px;
