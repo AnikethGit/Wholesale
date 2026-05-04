@@ -21,6 +21,7 @@ export default function AccountSettings() {
 
   useEffect(() => {
     if (!isAuthenticated) { router.push('/login'); return; }
+    if (user?.role === 'admin') { router.push('/admin'); return; }
     api.get('/users/profile').then((res) => {
       if (res.data?.user) setProfile({ first_name: res.data.user.first_name, last_name: res.data.user.last_name, phone: res.data.user.phone || '' });
     }).finally(() => setLoading(false));

@@ -42,7 +42,8 @@ export default function Login() {
 
     try {
       await login(formData.email, formData.password);
-      router.push('/account');
+      const { user } = useAuthStore.getState();
+      router.push(user?.role === 'admin' ? '/admin' : '/account');
     } catch (error) {
       setErrors({ submit: error.response?.data?.message || 'Login failed' });
     }

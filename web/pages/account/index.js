@@ -18,6 +18,10 @@ export default function AccountDashboard() {
       router.push('/login');
       return;
     }
+    if (user?.role === 'admin') {
+      router.push('/admin');
+      return;
+    }
 
     const fetchData = async () => {
       try {

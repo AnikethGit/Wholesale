@@ -93,10 +93,10 @@ export default function Header() {
                   <i className="fas fa-chevron-down" style={{ fontSize: '10px' }} />
                 </button>
                 <div className={styles.dropdown}>
-                  <Link href="/account" className={styles.dropItem}>
+                  <Link href={user?.role === 'admin' ? '/admin' : '/account'} className={styles.dropItem}>
                     <i className="fas fa-tachometer-alt" /> Dashboard
                   </Link>
-                  <Link href="/account/orders" className={styles.dropItem}>
+                  <Link href={user?.role === 'admin' ? '/admin/orders' : '/account/orders'} className={styles.dropItem}>
                     <i className="fas fa-box" /> My Orders
                   </Link>
                   <Link href="/account/addresses" className={styles.dropItem}>
@@ -136,8 +136,8 @@ export default function Header() {
             <div className={styles.mobileDivider} />
             {mounted && isAuthenticated ? (
               <>
-                <Link href="/account" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>My Account</Link>
-                <Link href="/account/orders" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>My Orders</Link>
+                <Link href={user?.role === 'admin' ? '/admin' : '/account'} className={styles.mobileLink} onClick={() => setMenuOpen(false)}>My Account</Link>
+                <Link href={user?.role === 'admin' ? '/admin/orders' : '/account/orders'} className={styles.mobileLink} onClick={() => setMenuOpen(false)}>My Orders</Link>
                 <button className={styles.mobileLink} onClick={() => { handleLogout(); setMenuOpen(false); }}>Sign Out</button>
               </>
             ) : (

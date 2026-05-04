@@ -22,6 +22,7 @@ export default function AccountOrders() {
 
   useEffect(() => {
     if (!isAuthenticated) { router.push('/login'); return; }
+    if (user?.role === 'admin') { router.push('/admin'); return; }
     fetchOrders();
   }, [isAuthenticated, filter, page]);
 

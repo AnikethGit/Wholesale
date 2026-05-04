@@ -27,6 +27,7 @@ export default function AccountAddresses() {
 
   useEffect(() => {
     if (!isAuthenticated) { router.push('/login'); return; }
+    if (user?.role === 'admin') { router.push('/admin'); return; }
     fetchAddresses();
   }, [isAuthenticated]);
 
