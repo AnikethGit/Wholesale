@@ -65,7 +65,8 @@ router.get('/analytics', adminMiddleware, async (req, res, next) => {
 // Get all products (admin)
 router.get('/products', adminMiddleware, async (req, res, next) => {
   try {
-    const { page = 1, limit = 20 } = req.query;
+    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * limit;
     const connection = await pool.getConnection();
 
@@ -192,7 +193,9 @@ router.delete('/products/:id', adminMiddleware, async (req, res, next) => {
 // Get all orders (admin)
 router.get('/orders', adminMiddleware, async (req, res, next) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
+    const { status } = req.query;
+    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * limit;
     const connection = await pool.getConnection();
 
