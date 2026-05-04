@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import api from '@/lib/api';
+import useAuthStore from '@/store/authStore';
 
 export default function InvoicePage() {
   const router = useRouter();
