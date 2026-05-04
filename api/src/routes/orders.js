@@ -7,7 +7,9 @@ const router = express.Router();
 // Get user orders
 router.get('/', authMiddleware, async (req, res, next) => {
   try {
-    const { status, page = 1, limit = 10 } = req.query;
+    const { status } = req.query;
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * limit;
     const connection = await pool.getConnection();
 
