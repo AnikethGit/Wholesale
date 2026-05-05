@@ -38,7 +38,7 @@ export default function AdminLayout({ children, title = 'Admin' }) {
   return (
     <>
       <Head>
-        <title>{title} — TechWholesale Admin</title>
+        <title>{title} — BestWholesale Admin</title>
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
