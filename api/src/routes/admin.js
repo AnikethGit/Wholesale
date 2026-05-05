@@ -2,8 +2,45 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import pool from '../config/database.js';
 import { adminMiddleware } from '../middleware/auth.js';
+import multer from 'multer';
+import { existsSync, mkdirSync } from 'fs';
+import { join, dirname, extname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const uploadsDir = join(__dirname, '../../../uploads');
+if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+    cb(null, `product-${unique}${extname(file.originalname).toLowerCase()}`);
+  },
+});
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(jpeg|jpg|png|webp|gif)$/.test(file.mimetype)) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  },
+});
 
 const router = express.Router();
+
+// ── Upload product image ──────────────────────────────────────────────────
+router.post('/products/upload-image', adminMiddleware, upload.single('image'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
+    const apiUrl = process.env.API_URL || 'http://localhost:5000';
+    const imageUrl = `${apiUrl}/uploads/${req.file.filename}`;
+    res.json({ url: imageUrl, filename: req.file.filename });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Get dashboard analytics
 router.get('/analytics', adminMiddleware, async (req, res, next) => {
@@ -120,19 +157,21 @@ router.post('/products', adminMiddleware, [
 
     const {
       category_id, sku, name, slug, description, short_description, price,
-      compare_at_price, cost_price, quantity, is_featured, specifications
+      compare_at_price, cost_price, quantity, is_featured, specifications,
+      image_url, thumbnail_url
     } = req.body;
 
     const connection = await pool.getConnection();
 
     const [result] = await connection.query(
       `INSERT INTO products 
-       (category_id, sku, name, slug, description, short_description, price, compare_at_price, cost_price, quantity, is_featured, specifications)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (category_id, sku, name, slug, description, short_description, price, compare_at_price, cost_price, quantity, is_featured, specifications, image_url, thumbnail_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         category_id, sku, name, slug, description || null, short_description || null,
-        price, compare_at_price || null, cost_price || null, quantity || 0, 
-        is_featured || false, JSON.stringify(specifications || {})
+        price, compare_at_price || null, cost_price || null, quantity || 0,
+        is_featured || false, JSON.stringify(specifications || {}),
+        image_url || null, thumbnail_url || null
       ]
     );
 
@@ -157,7 +196,7 @@ router.patch('/products/:id', adminMiddleware, async (req, res, next) => {
     const allowedFields = [
       'category_id', 'name', 'slug', 'description', 'short_description',
       'price', 'compare_at_price', 'cost_price', 'quantity', 'is_featured',
-      'is_active', 'specifications'
+      'is_active', 'specifications', 'image_url', 'thumbnail_url'
     ];
 
     Object.entries(req.body).forEach(([key, value]) => {

@@ -6,9 +6,20 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import 'express-async-errors';
 import dotenv from 'dotenv';
+import { existsSync, mkdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Load environment variables
 dotenv.config();
+
+// Ensure uploads directory exists
+const uploadsDir = process.env.UPLOAD_DIR
+  ? join(__dirname, '../../', process.env.UPLOAD_DIR)
+  : join(__dirname, '../../uploads');
+if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -36,6 +47,9 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// Serve uploaded product images as static files
+app.use('/uploads', express.static(uploadsDir));
 
 // Health check
 app.get('/health', (req, res) => {

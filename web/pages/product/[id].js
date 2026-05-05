@@ -78,19 +78,24 @@ export default function ProductDetail() {
         {/* Product Images */}
         <div className={styles.imageSection}>
           <div className={styles.mainImage}>
-            <div
-              style={{
-                background: `linear-gradient(135deg, #1a2340 0%, #2a3560 100%)`,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '120px'
-              }}
-            >
-              📱
-            </div>
+            {product.image_url ? (
+              <img
+                src={product.image_url}
+                alt={product.name}
+                style={{ width:'100%', height:'100%', objectFit:'contain', padding:'16px' }}
+              />
+            ) : (
+              <div
+                style={{
+                  background: `linear-gradient(135deg, #1a2340 0%, #2a3560 100%)`,
+                  width: '100%', height: '100%',
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', fontSize: '120px'
+                }}
+              >
+                📱
+              </div>
+            )}
           </div>
 
           {product.images?.length > 0 && (

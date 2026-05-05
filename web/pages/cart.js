@@ -75,19 +75,24 @@ export default function CartPage() {
             {items.map((item) => (
               <div key={item.id} className={styles.item}>
                 <div className={styles.itemImage}>
-                  <div
-                    style={{
-                      background: 'linear-gradient(135deg, #1a2340 0%, #2a3560 100%)',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '32px'
-                    }}
-                  >
-                    📦
-                  </div>
+                  {item.image_url || item.thumbnail_url ? (
+                    <img
+                      src={item.image_url || item.thumbnail_url}
+                      alt={item.product_name}
+                      style={{ width:'100%', height:'100%', objectFit:'contain', padding:'4px' }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        background: 'linear-gradient(135deg, #1a2340 0%, #2a3560 100%)',
+                        width: '100%', height: '100%',
+                        display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', fontSize: '32px'
+                      }}
+                    >
+                      📦
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.itemDetails}>

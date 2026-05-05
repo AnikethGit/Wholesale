@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import api from '@/lib/api';
 import styles from '@/styles/AdminProducts.module.css';
@@ -8,11 +8,14 @@ const EMPTY_FORM = {
   price: '', compare_at_price: '', cost_price: '',
   quantity: '', description: '', short_description: '',
   is_featured: false, is_active: true,
+  image_url: '',
 };
 
 function slugify(str) {
   return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 export default function AdminProducts() {
   const [products,   setProducts]   = useState([]);
@@ -20,11 +23,14 @@ export default function AdminProducts() {
   const [loading,    setLoading]    = useState(true);
   const [pagination, setPagination] = useState({ page: 1, total: 0 });
   const [search,     setSearch]     = useState('');
-  const [modal,      setModal]      = useState(null); // null | 'create' | 'edit' | 'delete'
-  const [selected,   setSelected]   = useState(null); // product being edited/deleted
+  const [modal,      setModal]      = useState(null);
+  const [selected,   setSelected]   = useState(null);
   const [form,       setForm]       = useState(EMPTY_FORM);
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState('');
+  const [imgPreview, setImgPreview] = useState('');
+  const [uploading,  setUploading]  = useState(false);
+  const fileRef = useRef(null);
 
   const fetchProducts = useCallback(async (page = 1, q = search) => {
     setLoading(true);
@@ -46,14 +52,43 @@ export default function AdminProducts() {
     }).catch(() => {});
   }, []);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  // ── Image upload ───────────────────────────────────────────────────────────
+  const handleImagePick = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const openCreate = () => {
-    setForm(EMPTY_FORM);
-    setError('');
-    setModal('create');
+    // Local preview
+    const reader = new FileReader();
+    reader.onload = (ev) => setImgPreview(ev.target.result);
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const raw = localStorage.getItem('auth-storage');
+      const token = raw ? JSON.parse(raw)?.state?.accessToken : null;
+      const res = await fetch(`${API_BASE}/api/admin/products/upload-image`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
+      const data = await res.json();
+      if (data.url) {
+        setForm(prev => ({ ...prev, image_url: data.url }));
+      } else {
+        setError(data.message || 'Image upload failed');
+      }
+    } catch {
+      setError('Image upload failed');
+    } finally { setUploading(false); }
   };
 
+  // ── Modal helpers ──────────────────────────────────────────────────────────
+  const openCreate = () => {
+    setForm(EMPTY_FORM); setImgPreview(''); setError(''); setModal('create');
+  };
   const openEdit = (p) => {
     setSelected(p);
     setForm({
@@ -69,14 +104,15 @@ export default function AdminProducts() {
       short_description: p.short_description || '',
       is_featured:       !!p.is_featured,
       is_active:         p.is_active === undefined ? true : !!p.is_active,
+      image_url:         p.image_url         || '',
     });
-    setError('');
-    setModal('edit');
+    setImgPreview(p.image_url || '');
+    setError(''); setModal('edit');
   };
-
   const openDelete = (p) => { setSelected(p); setModal('delete'); };
-  const closeModal = () => { setModal(null); setSelected(null); setError(''); };
+  const closeModal = () => { setModal(null); setSelected(null); setError(''); setImgPreview(''); };
 
+  // ── Submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -89,15 +125,15 @@ export default function AdminProducts() {
         compare_at_price: form.compare_at_price ? parseFloat(form.compare_at_price) : null,
         cost_price:       form.cost_price        ? parseFloat(form.cost_price)       : null,
         quantity:         parseInt(form.quantity) || 0,
+        thumbnail_url:    form.image_url || null,
       };
-
       let res;
       if (modal === 'create') {
         res = await api.post('/admin/products', payload);
-        if (res.status !== 201) throw new Error(res.data?.errors?.[0]?.msg || res.data?.message || 'Failed to create product');
+        if (res.status !== 201) throw new Error(res.data?.errors?.[0]?.msg || res.data?.message || 'Failed to create');
       } else {
         res = await api.patch(`/admin/products/${selected.id}`, payload);
-        if (res.status !== 200) throw new Error(res.data?.message || 'Failed to update product');
+        if (res.status !== 200) throw new Error(res.data?.message || 'Failed to update');
       }
       closeModal();
       fetchProducts(pagination.page, search);
@@ -116,10 +152,7 @@ export default function AdminProducts() {
     finally { setSaving(false); }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchProducts(1, search);
-  };
+  const handleSearch = (e) => { e.preventDefault(); fetchProducts(1, search); };
 
   const f = (key) => ({
     value: form[key],
@@ -136,7 +169,6 @@ export default function AdminProducts() {
   const totalPages = Math.ceil(pagination.total / 20);
 
   // ── Render ─────────────────────────────────────────────────────────────────
-
   return (
     <AdminLayout title="Products">
 
@@ -144,11 +176,7 @@ export default function AdminProducts() {
       <div className={styles.toolbar}>
         <form className={styles.searchWrap} onSubmit={handleSearch}>
           <i className="fas fa-search" />
-          <input
-            placeholder="Search by name or SKU…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+          <input placeholder="Search by name or SKU…" value={search} onChange={e => setSearch(e.target.value)} />
           <button type="submit">Search</button>
         </form>
         <button className={styles.createBtn} onClick={openCreate}>
@@ -169,13 +197,8 @@ export default function AdminProducts() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Product</th>
-                <th>SKU</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>Product</th><th>SKU</th><th>Category</th>
+                <th>Price</th><th>Stock</th><th>Status</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -184,8 +207,8 @@ export default function AdminProducts() {
                   <td>
                     <div className={styles.productCell}>
                       <div className={styles.productThumb}>
-                        {p.thumbnail_url
-                          ? <img src={p.thumbnail_url} alt={p.name} />
+                        {p.image_url || p.thumbnail_url
+                          ? <img src={p.image_url || p.thumbnail_url} alt={p.name} />
                           : <span>📦</span>
                         }
                       </div>
@@ -200,9 +223,7 @@ export default function AdminProducts() {
                   <td>
                     <div className={styles.priceCell}>
                       <span className={styles.price}>${Number(p.price).toFixed(2)}</span>
-                      {p.compare_at_price && (
-                        <span className={styles.comparePrice}>${Number(p.compare_at_price).toFixed(2)}</span>
-                      )}
+                      {p.compare_at_price && <span className={styles.comparePrice}>${Number(p.compare_at_price).toFixed(2)}</span>}
                     </div>
                   </td>
                   <td>
@@ -217,12 +238,8 @@ export default function AdminProducts() {
                   </td>
                   <td>
                     <div className={styles.actions}>
-                      <button className={styles.editBtn} onClick={() => openEdit(p)} title="Edit">
-                        <i className="fas fa-pen" /> Edit
-                      </button>
-                      <button className={styles.deleteBtn} onClick={() => openDelete(p)} title="Delete">
-                        <i className="fas fa-trash" />
-                      </button>
+                      <button className={styles.editBtn} onClick={() => openEdit(p)}><i className="fas fa-pen" /> Edit</button>
+                      <button className={styles.deleteBtn} onClick={() => openDelete(p)}><i className="fas fa-trash" /></button>
                     </div>
                   </td>
                 </tr>
@@ -232,7 +249,6 @@ export default function AdminProducts() {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className={styles.pagination}>
           <button disabled={pagination.page <= 1} onClick={() => fetchProducts(pagination.page - 1, search)} className={styles.pageBtn}>← Prev</button>
@@ -253,7 +269,44 @@ export default function AdminProducts() {
             <form onSubmit={handleSubmit} className={styles.modalForm}>
               <div className={styles.modalBody}>
 
-                {/* Row 1: Name + SKU */}
+                {/* Image upload */}
+                <div className={styles.imageSection}>
+                  <div className={styles.imagePreviewWrap} onClick={() => fileRef.current?.click()}>
+                    {imgPreview || form.image_url ? (
+                      <img src={imgPreview || form.image_url} alt="Product" className={styles.imagePreview} />
+                    ) : (
+                      <div className={styles.imagePlaceholder}>
+                        <i className="fas fa-cloud-upload-alt" />
+                        <span>Click to upload image</span>
+                        <small>JPG, PNG, WebP · Max 5 MB</small>
+                      </div>
+                    )}
+                    {uploading && (
+                      <div className={styles.imageUploading}>
+                        <i className="fas fa-spinner fa-spin" /> Uploading…
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={fileRef} type="file" accept="image/*"
+                    className={styles.fileInput} onChange={handleImagePick}
+                  />
+                  <div className={styles.imageActions}>
+                    <button type="button" className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading}>
+                      <i className="fas fa-upload" /> {imgPreview || form.image_url ? 'Change Image' : 'Upload Image'}
+                    </button>
+                    {(imgPreview || form.image_url) && (
+                      <button type="button" className={styles.removeImgBtn} onClick={() => { setImgPreview(''); setForm(p => ({ ...p, image_url: '' })); }}>
+                        <i className="fas fa-times" /> Remove
+                      </button>
+                    )}
+                  </div>
+                  {form.image_url && !uploading && (
+                    <div className={styles.imageUrlNote}><i className="fas fa-check-circle" /> Image uploaded</div>
+                  )}
+                </div>
+
+                {/* Row 1 */}
                 <div className={styles.row2}>
                   <div className={styles.field}>
                     <label>Product Name *</label>
@@ -265,12 +318,12 @@ export default function AdminProducts() {
                   </div>
                 </div>
 
-                {/* Row 2: Slug + Category */}
+                {/* Row 2 */}
                 <div className={styles.row2}>
                   <div className={styles.field}>
                     <label>Slug *</label>
                     <input {...f('slug')} placeholder="auto-generated from name" required />
-                    <span className={styles.hint}>URL: /product/… Auto-filled from name.</span>
+                    <span className={styles.hint}>Auto-filled from name.</span>
                   </div>
                   <div className={styles.field}>
                     <label>Category *</label>
@@ -281,25 +334,25 @@ export default function AdminProducts() {
                   </div>
                 </div>
 
-                {/* Row 3: Prices */}
+                {/* Prices */}
                 <div className={styles.row3}>
                   <div className={styles.field}>
                     <label>Price ($) *</label>
                     <input type="number" step="0.01" min="0" {...f('price')} placeholder="0.00" required />
                   </div>
                   <div className={styles.field}>
-                    <label>Compare-at Price ($)</label>
+                    <label>Compare-at ($)</label>
                     <input type="number" step="0.01" min="0" {...f('compare_at_price')} placeholder="0.00" />
                     <span className={styles.hint}>Shown as strikethrough.</span>
                   </div>
                   <div className={styles.field}>
-                    <label>Cost Price ($)</label>
+                    <label>Cost ($)</label>
                     <input type="number" step="0.01" min="0" {...f('cost_price')} placeholder="0.00" />
                     <span className={styles.hint}>Internal only.</span>
                   </div>
                 </div>
 
-                {/* Row 4: Stock */}
+                {/* Stock + Short desc */}
                 <div className={styles.row2}>
                   <div className={styles.field}>
                     <label>Stock Quantity *</label>
@@ -314,26 +367,22 @@ export default function AdminProducts() {
                 {/* Description */}
                 <div className={styles.field}>
                   <label>Full Description</label>
-                  <textarea
-                    rows={4}
-                    value={form.description}
+                  <textarea rows={4} value={form.description}
                     onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                    placeholder="Detailed product description…"
-                    className={styles.textarea}
-                  />
+                    placeholder="Detailed product description…" className={styles.textarea} />
                 </div>
 
                 {/* Toggles */}
                 <div className={styles.toggleRow}>
                   <label className={styles.toggle}>
-                    <input type="checkbox" checked={form.is_featured} onChange={e => setForm(p => ({ ...p, is_featured: e.target.checked }))} />
-                    <span className={styles.toggleSlider} />
-                    Featured product
+                    <input type="checkbox" checked={form.is_featured}
+                      onChange={e => setForm(p => ({ ...p, is_featured: e.target.checked }))} />
+                    <span className={styles.toggleSlider} /> Featured product
                   </label>
                   <label className={styles.toggle}>
-                    <input type="checkbox" checked={form.is_active} onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} />
-                    <span className={styles.toggleSlider} />
-                    Active (visible in store)
+                    <input type="checkbox" checked={form.is_active}
+                      onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} />
+                    <span className={styles.toggleSlider} /> Active (visible in store)
                   </label>
                 </div>
 
@@ -342,7 +391,7 @@ export default function AdminProducts() {
 
               <div className={styles.modalFooter}>
                 <button type="button" className={styles.cancelBtn} onClick={closeModal}>Cancel</button>
-                <button type="submit" className={styles.saveBtn} disabled={saving}>
+                <button type="submit" className={styles.saveBtn} disabled={saving || uploading}>
                   {saving
                     ? <><i className="fas fa-spinner fa-spin" /> Saving…</>
                     : <><i className="fas fa-check" /> {modal === 'create' ? 'Create Product' : 'Save Changes'}</>
@@ -354,7 +403,7 @@ export default function AdminProducts() {
         </div>
       )}
 
-      {/* ── Delete Confirm Modal ── */}
+      {/* ── Delete Modal ── */}
       {modal === 'delete' && selected && (
         <div className={styles.overlay} onClick={e => e.target === e.currentTarget && closeModal()}>
           <div className={`${styles.modal} ${styles.modalSm}`}>
@@ -366,7 +415,7 @@ export default function AdminProducts() {
               <div className={styles.deleteIcon}><i className="fas fa-trash-alt" /></div>
               <p>Are you sure you want to delete</p>
               <strong>"{selected.name}"</strong>
-              <p className={styles.deleteWarn}>This will permanently remove the product and cannot be undone.</p>
+              <p className={styles.deleteWarn}>This permanently removes the product and cannot be undone.</p>
               {error && <div className={styles.errorBox}>{error}</div>}
             </div>
             <div className={styles.modalFooter}>
@@ -378,7 +427,6 @@ export default function AdminProducts() {
           </div>
         </div>
       )}
-
     </AdminLayout>
   );
 }

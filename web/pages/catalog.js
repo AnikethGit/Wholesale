@@ -164,10 +164,11 @@ export default function Catalog() {
                           {/* Coloured image area */}
                           <div className={styles.imageContainer}>
                             <div className={styles.image} style={{ background: bg }}>
-                              <div className={styles.cardIcon}>{icon}</div>
-                              {product.is_featured && (
-                                <span className={styles.badge}>Featured</span>
-                              )}
+                              {product.image_url
+                                ? <img src={product.image_url} alt={product.name} className={styles.realImg} />
+                                : <div className={styles.cardIcon}>{icon}</div>
+                              }
+                              {product.is_featured && <span className={styles.badge}>Featured</span>}
                             </div>
                           </div>
                           {/* Card body */}
