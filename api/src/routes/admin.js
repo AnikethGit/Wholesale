@@ -65,18 +65,31 @@ router.get('/analytics', adminMiddleware, async (req, res, next) => {
 // Get all products (admin)
 router.get('/products', adminMiddleware, async (req, res, next) => {
   try {
-    const limit = parseInt(req.query.limit) || 20;
-    const page = parseInt(req.query.page) || 1;
+    const limit  = parseInt(req.query.limit)  || 20;
+    const page   = parseInt(req.query.page)   || 1;
     const offset = (page - 1) * limit;
+    const search = req.query.search || '';
     const connection = await pool.getConnection();
 
+    let where  = '';
+    const params = [];
+    if (search) {
+      where = 'WHERE p.name LIKE ? OR p.sku LIKE ?';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
     const [products] = await connection.query(
-      'SELECT * FROM products ORDER BY created_at DESC LIMIT ? OFFSET ?',
-      [limit, offset]
+      `SELECT p.*, c.name as category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       ${where}
+       ORDER BY p.created_at DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
     );
 
     const [countResult] = await connection.query(
-      'SELECT COUNT(*) as total FROM products'
+      `SELECT COUNT(*) as total FROM products p ${where}`,
+      params
     );
 
     connection.release();
