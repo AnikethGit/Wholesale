@@ -91,4 +91,31 @@ process.on('SIGTERM', () => {
   });
 });
 
+const { createServer } = require('http');
+const { parse } = require('url');
+const next = require('next');
+const express = require('express');
+
+const dev = process.env.NODE_ENV !== 'production';
+const nextApp = next({ dev, dir: '../web' });
+const handle = nextApp.getRequestHandler();
+
+nextApp.prepare().then(() => {
+  const app = express();
+
+  // All your existing API middleware and routes go here
+  // app.use('/api/auth', authRoutes);  ← keep existing routes
+
+  // Next.js handles everything else
+  app.all('*', (req, res) => {
+    const parsedUrl = parse(req.url, true);
+    handle(req, res, parsedUrl);
+  });
+
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+});
+
 export default app;
