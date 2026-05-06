@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -13,13 +15,7 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
-  pageExtensions: ['js', 'jsx']
-};
-
-const path = require('path');
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+  pageExtensions: ['js', 'jsx'],
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
