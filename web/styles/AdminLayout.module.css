@@ -1,25 +1,4 @@
-:root {
-  --font-heading: 'Montserrat', sans-serif;
-  --font-body: 'Poppins', sans-serif;
-  --primary: #16163F;
-  --accent: #56CFE1;
-  --accent-dark: #2fa8bc;
-  --gold: #E8B84B;
-  --white: #ffffff;
-  --black: #0a0a0a;
-  --gray-50: #fafafa;
-  --gray-100: #f4f5f7;
-  --gray-200: #e8eaed;
-  --gray-400: #9aa0ab;
-  --gray-500: #6b7280;
-  --gray-700: #374151;
-  --sidebar-w: 240px;
-  --topbar-h: 60px;
-  --radius: 8px;
-}
-
-/* *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-body); } */
+/* Admin layout variables are defined in globals.css */
 
 .shell {
   display: flex;
@@ -29,7 +8,7 @@ body { font-family: var(--font-body); } */
 
 /* ── Sidebar ── */
 .sidebar {
-  width: var(--sidebar-w);
+  width: var(--sidebar-w, 240px);
   background: var(--primary);
   display: flex;
   flex-direction: column;
@@ -120,7 +99,7 @@ body { font-family: var(--font-body); } */
 
 /* ── Main ── */
 .main {
-  margin-left: var(--sidebar-w);
+  margin-left: var(--sidebar-w, 240px);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -128,7 +107,7 @@ body { font-family: var(--font-body); } */
 }
 
 .topbar {
-  height: var(--topbar-h);
+  height: var(--topbar-h, 60px);
   background: var(--white);
   border-bottom: 1px solid var(--gray-200);
   display: flex;
