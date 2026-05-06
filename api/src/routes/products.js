@@ -159,11 +159,17 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
 
     connection.release();
 
+    const safeParse = (val, fallback) => {
+      if (!val) return fallback;
+      if (typeof val === 'object') return val;
+      try { return JSON.parse(val); } catch { return fallback; }
+    };
+
     res.json({
       product: {
         ...product,
-        images: product.images ? JSON.parse(product.images) : [],
-        specifications: product.specifications ? JSON.parse(product.specifications) : {},
+        images:         safeParse(product.images, []),
+        specifications: safeParse(product.specifications, {}),
         variants,
         reviews
       }
