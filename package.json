@@ -31,6 +31,12 @@
     "express",
     "mysql"
   ],
+  {
+    "overrides": {
+      "react": "18.x",
+      "react-dom": "18.x"
+    }
+  },
   "author": "BestWholesale",
   "license": "MIT"
 }
