@@ -15,7 +15,14 @@ function slugify(str) {
   return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace('/api', '');
+
+// Resolve image URL — handles both absolute URLs and relative /uploads/... paths
+function resolveImg(url) {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+}
 
 export default function AdminProducts() {
   const [products,   setProducts]   = useState([]);
@@ -208,7 +215,7 @@ export default function AdminProducts() {
                     <div className={styles.productCell}>
                       <div className={styles.productThumb}>
                         {p.image_url || p.thumbnail_url
-                          ? <img src={p.image_url || p.thumbnail_url} alt={p.name} />
+                          ? <img src={resolveImg(p.image_url || p.thumbnail_url)} alt={p.name} />
                           : <span>📦</span>
                         }
                       </div>
@@ -273,7 +280,7 @@ export default function AdminProducts() {
                 <div className={styles.imageSection}>
                   <div className={styles.imagePreviewWrap} onClick={() => fileRef.current?.click()}>
                     {imgPreview || form.image_url ? (
-                      <img src={imgPreview || form.image_url} alt="Product" className={styles.imagePreview} />
+                      <img src={imgPreview || resolveImg(form.image_url)} alt="Product" className={styles.imagePreview} />
                     ) : (
                       <div className={styles.imagePlaceholder}>
                         <i className="fas fa-cloud-upload-alt" />

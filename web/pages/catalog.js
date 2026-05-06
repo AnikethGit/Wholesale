@@ -5,6 +5,13 @@ import Layout from '@/components/Layout';
 import api from '@/lib/api';
 import styles from '@/styles/Catalog.module.css';
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace('/api', '');
+function resolveImg(url) {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+}
+
 // Category-to-gradient and emoji mapping for visual variety
 const CATEGORY_STYLE = {
   smartphones:    { bg: 'linear-gradient(135deg,#1a2340 0%,#2a3560 100%)', icon: '📱' },
@@ -165,7 +172,7 @@ export default function Catalog() {
                           <div className={styles.imageContainer}>
                             <div className={styles.image} style={{ background: bg }}>
                               {product.image_url
-                                ? <img src={product.image_url} alt={product.name} className={styles.realImg} />
+                                ? <img src={resolveImg(product.image_url)} alt={product.name} className={styles.realImg} />
                                 : <div className={styles.cardIcon}>{icon}</div>
                               }
                               {product.is_featured && <span className={styles.badge}>Featured</span>}

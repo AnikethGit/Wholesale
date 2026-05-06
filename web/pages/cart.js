@@ -6,6 +6,13 @@ import useAuthStore from '@/store/authStore';
 import Layout from '@/components/Layout';
 import styles from '@/styles/Cart.module.css';
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace('/api', '');
+function resolveImg(url) {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+}
+
 export default function CartPage() {
   const router = useRouter();
   const { items, removeItem, updateItemQuantity, getTotal } = useCartStore();
@@ -77,7 +84,7 @@ export default function CartPage() {
                 <div className={styles.itemImage}>
                   {item.image_url || item.thumbnail_url ? (
                     <img
-                      src={item.image_url || item.thumbnail_url}
+                      src={resolveImg(item.image_url || item.thumbnail_url)}
                       alt={item.product_name}
                       style={{ width:'100%', height:'100%', objectFit:'contain', padding:'4px' }}
                     />

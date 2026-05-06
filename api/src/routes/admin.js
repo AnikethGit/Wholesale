@@ -35,8 +35,9 @@ router.post('/products/upload-image', adminMiddleware, upload.single('image'), a
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
     const apiUrl = process.env.API_URL || 'http://localhost:5000';
-    const imageUrl = `${apiUrl}/uploads/${req.file.filename}`;
-    res.json({ url: imageUrl, filename: req.file.filename });
+    const relativePath = `/uploads/${req.file.filename}`;
+    const imageUrl = `${apiUrl}${relativePath}`;
+    res.json({ url: imageUrl, path: relativePath, filename: req.file.filename });
   } catch (error) {
     next(error);
   }

@@ -48,8 +48,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Serve uploaded product images as static files
-app.use('/uploads', express.static(uploadsDir));
+// Serve uploaded product images — must set cross-origin header so browsers
+// allow <img> tags on localhost:3000 to load files from localhost:5000
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(uploadsDir));
 
 // Health check
 app.get('/health', (req, res) => {
