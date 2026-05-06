@@ -8,12 +8,19 @@
   --gold: #E8B84B;
   --white: #ffffff;
   --black: #0a0a0a;
+  --gray-50: #fafafa;
   --gray-100: #f8f8f8;
   --gray-200: #eeeeee;
+  --gray-400: #9aa0ab;
   --gray-500: #888888;
   --gray-700: #444444;
   --font-heading: 'Montserrat', sans-serif;
   --font-body: 'Poppins', sans-serif;
+
+  /* Admin Layout */
+  --sidebar-w: 240px;
+  --topbar-h: 60px;
+  --radius: 8px;
   
   /* Spacing */
   --spacing-xs: 4px;
