@@ -40,8 +40,19 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  credentials: true
+  origin: (origin, callback) => {
+    const allowed = [
+      process.env.NEXT_PUBLIC_APP_URL,
+      process.env.FRONTEND_URL,
+      'http://localhost:3000',
+    ].filter(Boolean);
+    if (!origin || allowed.some(o => origin.startsWith(o))) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
 }));
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
